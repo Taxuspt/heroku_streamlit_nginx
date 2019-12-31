@@ -1,0 +1,64 @@
+daemon off;
+#Heroku dynos have at least 4 cores.
+worker_processes <%= ENV['NGINX_WORKERS'] || 4 %>;
+
+events {
+   use epoll;
+   accept_mutex on;
+   worker_connections <%= ENV['NGINX_WORKER_CONNECTIONS'] || 1024 %>;
+}
+
+http {
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
+    gzip on;
+    gzip_comp_level 2;
+    gzip_min_length 512;
+
+   server_tokens off;
+
+   log_format l2met 'measure#nginx.service=$request_time request_id=$http_x_request_id';
+   access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/access.log' %> l2met;
+   error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %>;
+
+   include mime.types;
+   default_type application/octet-stream;
+   sendfile on;
+
+   #Must read the body in 5 seconds.
+   client_body_timeout 5;
+
+   server {
+      listen <%= ENV["PORT"] %>;
+      server_name localhost;
+      keepalive_timeout 5;
+
+      location / {
+          auth_basic           "closed site";
+          auth_basic_user_file /app/.htpasswd;
+          proxy_pass http://127.0.0.1:8501/;
+      }
+
+      location ^~ /static {
+          proxy_pass http://127.0.0.1:8501/static/;
+      }
+      location ^~ /healthz {
+          proxy_pass http://127.0.0.1:8501/healthz;
+      }
+      location ^~ /vendor {
+          proxy_pass http://127.0.0.1:8501/vendor;
+      }
+      location /stream { # most important config
+          proxy_pass http://127.0.0.1:8501/stream;
+          proxy_http_version 1.1;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_read_timeout 86400;
+      }
+   }
+}
