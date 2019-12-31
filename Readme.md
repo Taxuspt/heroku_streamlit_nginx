@@ -1,8 +1,10 @@
-# Host Streamlit on Heroku with Nginx
+# Host Streamlit on Heroku with Nginx basic authentication
 
-Created By: Alexandre Domingues
-Last Edited: Dec 31, 2019 11:45 AM
-Tags: Heroku, Nginx, Streamlit
+This project shows an example of how to:
+  - Host a streamlit app on Heroku.
+  - Setup nginx on Heroku and serve the streamlit app via nginx.
+  - Host multiple streamlit apps under the same process (a single tornado server).
+  - Add basic user authentication with Nginx to restrict user access to your apps.
 
 # Streamlit app hosted on Heroku
 
@@ -12,7 +14,7 @@ Tags: Heroku, Nginx, Streamlit
 
 `cd my_project`
 
-Since we're hosting on Heroku it's recommended that we create a dedicated virtual environment  
+Since we're hosting on Heroku it's recommended that we create a dedicated virtual environment
 
 `virtualenv .venv`
 
