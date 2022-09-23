@@ -25,7 +25,7 @@ numpy==1.18.0
 pandas==0.25.3
 pathtools==0.1.2
 Pillow==9.0.1
-protobuf==3.11.2
+protobuf==3.18.3
 pyrsistent==0.15.6
 python-dateutil==2.8.0
 pytz==2019.3
